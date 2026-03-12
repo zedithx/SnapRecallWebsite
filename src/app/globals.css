@@ -27,6 +27,7 @@ body {
   color: var(--foreground);
   font-family: "Avenir Next", "Segoe UI", "Inter", system-ui, sans-serif;
   font-feature-settings: "kern" 1;
+  text-rendering: optimizeLegibility;
 }
 
 * {
@@ -51,10 +52,12 @@ section[id] {
 
 .hero-orb {
   animation: float-orb 12s ease-in-out infinite;
+  will-change: transform;
 }
 
 .demo-frame {
   animation: float-demo 8.5s ease-in-out infinite;
+  will-change: transform;
 }
 
 .demo-scan {
@@ -116,11 +119,17 @@ section[id] {
   padding-block: var(--space-section-tight);
 }
 
+.deferred-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 820px;
+}
+
 .hero-heading {
   font-size: var(--text-display);
   line-height: 1.04;
   letter-spacing: -0.035em;
   font-weight: 560;
+  text-wrap: balance;
 }
 
 .section-heading {
@@ -128,6 +137,7 @@ section[id] {
   line-height: 1.12;
   letter-spacing: -0.027em;
   font-weight: 540;
+  text-wrap: balance;
 }
 
 .kicker {
@@ -142,11 +152,13 @@ section[id] {
   line-height: 1.58;
   letter-spacing: -0.012em;
   color: rgba(255, 255, 255, 0.34);
+  text-wrap: pretty;
 }
 
 .surface-card {
   border: 1px solid var(--border-subtle);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, rgba(255, 255, 255, 0.018) 100%);
+  contain: layout paint;
 }
 
 .motion-card {
@@ -234,5 +246,9 @@ section[id] {
 
   .lead-text {
     line-height: 1.5;
+  }
+
+  .deferred-section {
+    contain-intrinsic-size: 1px 700px;
   }
 }
