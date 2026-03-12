@@ -45,6 +45,10 @@ a {
   text-decoration: none;
 }
 
+section[id] {
+  scroll-margin-top: 96px;
+}
+
 .hero-orb {
   animation: float-orb 12s ease-in-out infinite;
 }
