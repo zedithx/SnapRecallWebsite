@@ -121,6 +121,12 @@ const navItems = [
   { label: "FAQ", href: "#faq" },
 ];
 const delays = ["delay-1", "delay-2", "delay-3", "delay-4"];
+const demoFacts = [
+  { label: "Date", value: "March 15, 2026", tint: "text-[#9ec0ff]" },
+  { label: "Time", value: "2:00 PM", tint: "text-[#ffd089]" },
+  { label: "Room", value: "304, Eng. Bldg", tint: "text-[#82f2cb]" },
+  { label: "Course", value: "CS201 Final", tint: "text-[#d4c3ff]" },
+];
 
 function Logo() {
   return (
@@ -183,6 +189,149 @@ function WaitlistForm({ compact = false }: { compact?: boolean }) {
   );
 }
 
+function usePrefersReducedMotion() {
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const handleChange = () => setPrefersReducedMotion(mediaQuery.matches);
+
+    handleChange();
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
+
+  return prefersReducedMotion;
+}
+
+function DemoExtraction() {
+  const prefersReducedMotion = usePrefersReducedMotion();
+  const [step, setStep] = useState(0);
+  const visibleStep = prefersReducedMotion ? 3 : step;
+
+  useEffect(() => {
+    if (prefersReducedMotion) {
+      return;
+    }
+
+    let cancelled = false;
+    let timers: number[] = [];
+
+    const startCycle = () => {
+      setStep(0);
+      timers = [
+        window.setTimeout(() => {
+          if (!cancelled) {
+            setStep(1);
+          }
+        }, 900),
+        window.setTimeout(() => {
+          if (!cancelled) {
+            setStep(2);
+          }
+        }, 2200),
+        window.setTimeout(() => {
+          if (!cancelled) {
+            setStep(3);
+          }
+        }, 3800),
+        window.setTimeout(() => {
+          if (!cancelled) {
+            startCycle();
+          }
+        }, 6200),
+      ];
+    };
+
+    startCycle();
+
+    return () => {
+      cancelled = true;
+      timers.forEach((timer) => window.clearTimeout(timer));
+    };
+  }, [prefersReducedMotion]);
+
+  return (
+    <div className="relative">
+      <div className="pointer-events-none absolute -inset-6 rounded-[28px] bg-[#7f22fe]/18 blur-3xl" />
+      <div className="surface-card demo-frame relative overflow-hidden rounded-[24px] bg-[#0f0f14] shadow-[0_24px_64px_-18px_rgba(0,0,0,0.82)]">
+        <div className="flex items-center gap-2 border-b border-white/8 px-4 py-3">
+          <span className="size-2.5 rounded-full bg-[#ff5f57]" />
+          <span className="size-2.5 rounded-full bg-[#febc2e]" />
+          <span className="size-2.5 rounded-full bg-[#28c840]" />
+          <span className="ml-2 text-[11px] tracking-wide text-white/25">SnapRecall</span>
+        </div>
+
+        <div className="space-y-4 p-4 sm:p-5">
+          <div
+            className={`relative overflow-hidden rounded-[14px] border bg-[#1a1a24] p-4 transition duration-500 ${
+              visibleStep >= 1 ? "border-[#8e51ff]/45" : "border-white/6"
+            }`}
+          >
+            <p className="text-[10px] text-white/40">University Portal</p>
+            <p className="mt-2 text-sm text-white">CS201 - Data Structures Final Exam</p>
+            <p className="mt-2 text-xs text-white/50">Date: March 15, 2026 | Time: 2:00 PM</p>
+            <p className="mt-1 text-xs text-white/50">Location: Room 304, Engineering Building</p>
+            {visibleStep >= 1 ? <div aria-hidden className="demo-scan absolute inset-0" /> : null}
+          </div>
+
+          <div
+            className={`grid overflow-hidden transition-[grid-template-rows,opacity,margin] duration-500 ease-[var(--ease-emphasized)] ${
+              visibleStep >= 2 ? "mt-1 grid-rows-[1fr] opacity-100" : "mt-0 grid-rows-[0fr] opacity-0"
+            }`}
+          >
+            <div className="overflow-hidden">
+              <div className="space-y-2">
+                {demoFacts.map((fact, index) => (
+                  <div
+                    key={fact.label}
+                    className={`flex items-center gap-3 rounded-[11px] bg-white/[0.035] px-3 py-2.5 text-sm transition duration-500 ease-[var(--ease-emphasized)] ${
+                      visibleStep >= 2 ? "translate-x-0 opacity-100" : "-translate-x-3 opacity-0"
+                    }`}
+                    style={{ transitionDelay: `${index * 90}ms` }}
+                  >
+                    <span className="w-11 text-[10px] uppercase tracking-[0.12em] text-white/28">
+                      {fact.label}
+                    </span>
+                    <span className={fact.tint}>{fact.value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex min-h-5 items-center justify-center gap-2 text-xs">
+            {visibleStep === 0 ? <span className="text-white/25">Press Cmd+Shift+S to capture</span> : null}
+            {visibleStep === 1 ? (
+              <>
+                <span className="size-3.5 animate-spin rounded-full border border-[#a684ff]/25 border-t-[#a684ff]" />
+                <span className="text-[#a684ff]">Extracting facts...</span>
+              </>
+            ) : null}
+            {visibleStep === 2 ? (
+              <>
+                <span className="flex size-4 items-center justify-center rounded-full bg-[#00bc7d]/15 text-[10px] text-[#82f2cb]">
+                  ✓
+                </span>
+                <span className="text-[#82f2cb]">4 facts extracted</span>
+              </>
+            ) : null}
+            {visibleStep === 3 ? (
+              <>
+                <span className="flex size-4 items-center justify-center rounded-full bg-[#00bc7d]/15 text-[10px] text-[#82f2cb]">
+                  ✓
+                </span>
+                <span className="text-[#82f2cb]">Saved and synced</span>
+              </>
+            ) : null}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function useRevealAnimations() {
   useEffect(() => {
     const elements = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
@@ -209,7 +358,8 @@ function useRevealAnimations() {
 }
 
 export default function Home() {
-  const [openFaq, setOpenFaq] = useState(0);
+  const [openFaq, setOpenFaq] = useState(-1);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   useRevealAnimations();
 
@@ -235,7 +385,7 @@ export default function Home() {
               </a>
             ))}
           </div>
-          <div className="hidden items-center gap-3 sm:flex">
+          <div className="hidden items-center gap-3 md:flex">
             <button type="button" className="px-2 text-sm text-white/45 transition duration-300 hover:text-white/85">
               Open App
             </button>
@@ -246,7 +396,69 @@ export default function Home() {
               Join Waitlist
             </a>
           </div>
+          <button
+            type="button"
+            className="flex size-10 items-center justify-center rounded-full border border-white/8 bg-white/[0.03] text-white/70 transition duration-300 hover:border-white/16 hover:bg-white/[0.05] hover:text-white md:hidden"
+            aria-expanded={mobileMenuOpen}
+            aria-label="Toggle navigation"
+            onClick={() => setMobileMenuOpen((current) => !current)}
+          >
+            <span className="relative block h-4 w-4">
+              <span
+                className={`absolute left-0 top-0 h-px w-4 bg-current transition duration-300 ${
+                  mobileMenuOpen ? "translate-y-[7px] rotate-45" : "translate-y-[3px]"
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-0 h-px w-4 bg-current transition duration-300 ${
+                  mobileMenuOpen ? "opacity-0" : "translate-y-[7px]"
+                }`}
+              />
+              <span
+                className={`absolute left-0 top-0 h-px w-4 bg-current transition duration-300 ${
+                  mobileMenuOpen ? "translate-y-[7px] -rotate-45" : "translate-y-[11px]"
+                }`}
+              />
+            </span>
+          </button>
         </nav>
+
+        <div
+          className={`grid overflow-hidden border-t border-white/6 bg-[rgba(10,10,18,0.94)] transition-[grid-template-rows,opacity] duration-500 ease-[var(--ease-emphasized)] md:hidden ${
+            mobileMenuOpen ? "grid-rows-[1fr] opacity-100" : "pointer-events-none grid-rows-[0fr] opacity-0"
+          }`}
+        >
+          <div className="overflow-hidden">
+            <div className="mx-auto flex w-full max-w-[1152px] flex-col gap-2 px-4 py-4 sm:px-6">
+              {navItems.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  className="rounded-xl px-3 py-2 text-sm text-white/65 transition duration-300 hover:bg-white/[0.04] hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.label}
+                </a>
+              ))}
+              <div className="mt-2 flex flex-col gap-2 border-t border-white/6 pt-3">
+                <button
+                  type="button"
+                  className="rounded-xl px-3 py-2 text-left text-sm text-white/65 transition duration-300 hover:bg-white/[0.04] hover:text-white"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Open App
+                </button>
+                <a
+                  href="#waitlist"
+                  className="rounded-xl bg-[#7f22fe] px-4 py-2.5 text-center text-sm text-white transition duration-300 hover:bg-[#9249ff]"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Join Waitlist
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
       </header>
 
       <main className="relative">
@@ -274,25 +486,8 @@ export default function Home() {
             </div>
           </div>
 
-          <div data-reveal className="reveal delay-2 relative mt-1">
-            <div className="pointer-events-none absolute -inset-6 rounded-[26px] bg-[#7f22fe]/20 blur-3xl" />
-            <div className="surface-card motion-card relative rounded-2xl bg-[#0f0f14] shadow-[0_22px_55px_-16px_rgba(0,0,0,0.8)] hover:-translate-y-1 hover:shadow-[0_30px_70px_-20px_rgba(127,34,254,0.7)]">
-              <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
-                <span className="size-2.5 rounded-full bg-[#ff5f57]" />
-                <span className="size-2.5 rounded-full bg-[#febc2e]" />
-                <span className="size-2.5 rounded-full bg-[#28c840]" />
-                <span className="ml-2 text-[11px] tracking-wide text-white/25">SnapRecall</span>
-              </div>
-              <div className="space-y-3 p-4 sm:space-y-4 sm:p-5">
-                <div className="rounded-[10px] border border-[#8e51ff]/35 bg-[#1a1a24] p-4">
-                  <p className="text-[10px] text-white/40">University Portal</p>
-                  <p className="mt-2 text-sm text-white">CS201 - Data Structures Final Exam</p>
-                  <p className="mt-2 text-xs text-white/50">Date: March 15, 2026 | Time: 2:00 PM</p>
-                  <p className="mt-1 text-xs text-white/50">Location: Room 304, Engineering Building</p>
-                </div>
-                <p className="text-center text-xs text-[#a684ff]">Extracting facts...</p>
-              </div>
-            </div>
+          <div data-reveal className="reveal delay-2 relative mx-auto mt-1 w-full max-w-[440px] lg:mx-0">
+            <DemoExtraction />
           </div>
         </section>
 
